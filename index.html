@@ -461,11 +461,14 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            opacity: 0;
+            opacity: 1; /* 初始显示overlay */
             transition: opacity 0.3s;
         }
 
-        .video-container:hover .video-overlay { opacity: 1; }
+        .video-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
 
         .play-btn {
             background: rgba(0, 243, 255, 0.8);
@@ -591,9 +594,16 @@
             font-size: 0.95rem;
             border-top: 1px solid #222;
             background: rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        footer p { margin: 8px 0; }
+        footer p {
+            margin: 0;
+        }
 
         @keyframes globeSpin { from { background-position: 0 0; } to { background-position: -200% 0; } }
         @keyframes pulse { 0% { transform: translate(-50%,-50%) scale(1); opacity:0.8; } 100% { transform: translate(-50%,-50%) scale(2); opacity:0; } }
@@ -603,7 +613,7 @@
 </head>
 <body class="locked">
 
-    <!-- 导航栏 - 初始隐藏 -->
+    <!-- 固定导航 - 初始隐藏 -->
     <header class="hidden">
         <div class="brand"><i class="fas fa-satellite-dish"></i> DeepFocus</div>
         <nav>
@@ -785,11 +795,15 @@
 
         function playVideo() {
             mainVideo.play();
-            mainVideo.parentElement.querySelector('.video-overlay').style.opacity = '0';
+            document.querySelector('.video-overlay').classList.add('hidden');
         }
 
         mainVideo.addEventListener('ended', function() {
-            this.parentElement.querySelector('.video-overlay').style.opacity = '1';
+            document.querySelector('.video-overlay').classList.remove('hidden');
+        });
+
+        mainVideo.addEventListener('pause', function() {
+            document.querySelector('.video-overlay').classList.remove('hidden');
         });
 
         function nextSlide(target) {
