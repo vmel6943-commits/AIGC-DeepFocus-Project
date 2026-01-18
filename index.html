@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="智能的折叠：AIGC背后的全球产业链深度调查 — 从硅谷算力中心到肯尼亚数据标注隐形劳工">
+    <meta name="keywords" content="AIGC, 生成式AI, 数据标注, 全球产业链, 隐形劳工, ChatGPT">
+    <meta name="author" content="数媒Lab DeepFocus Team">
+    <title>数智技术之下的他们 | 智能的折叠</title>
+
+    <!-- CDN 图标字体：Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #020202;
+            --text-main: #f0f0f0;
+            --cyan: #00f3ff;
+            --cyan-dim: rgba(0, 243, 255, 0.2);
+            --pink: #ff003c;
+            --gold: #ffd700;
+            --font-main: 'Noto Serif SC', serif;
+            --font-code: 'Share Tech Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        body.locked {
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 0; background: transparent; }
+
+        /* 导航栏与页脚初始隐藏 */
+        header, footer {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        header.visible, footer.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 大标题只在 intro 阶段显示 */
+        .page-title {
+            position: fixed;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-code);
+            font-size: 2.8rem;
+            color: var(--cyan);
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px var(--cyan-dim);
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0.92;
+            transition: opacity 0.8s ease;
+        }
+
+        .page-title.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(2, 2, 2, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+            z-index: 3000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .brand {
+            font-family: var(--font-code);
+            color: var(--cyan);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--cyan-dim);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        nav a {
+            color: #888;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-family: var(--font-code);
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: #fff;
+            text-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* 全息地球层 */
+        .stage-intro {
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #111 0%, #000 90%);
+            transition: transform 1s cubic-bezier(0.8, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .stage-intro.slide-out {
+            transform: translateY(-100vh);
+        }
+
+        .hologram-wrapper {
+            position: relative;
+            width: 60vh;
+            height: 60vh;
+            border-radius: 50%;
+            margin-bottom: 60px;
+            box-shadow: 0 0 80px var(--cyan-dim), inset 0 0 60px rgba(0,0,0,0.9);
+            background: #000;
+            z-index: 10;
+        }
+
+        .data-globe {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/1024px-Blue_Marble_2002.png');
+            background-size: auto 100%;
+            background-repeat: repeat-x;
+            filter: sepia(100%) hue-rotate(180deg) saturate(250%) contrast(1.2) brightness(0.9);
+            animation: globeSpin 60s linear infinite;
+            opacity: 0.9;
+        }
+
+        .hologram-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent 50%);
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.5), inset -10px 0 20px rgba(0, 243, 255, 0.2);
+            pointer-events: none;
+        }
+
+        .data-point {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            top: 40%;
+            left: 70%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: all 0.8s ease-in-out;
+            z-index: 20;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        .data-point.active { opacity: 1; animation: pulse 1.5s infinite; }
+        .data-point.alert   { background: var(--pink); box-shadow: 0 0 20px var(--pink); }
+
+        .info-panel {
+            position: absolute;
+            bottom: 10%;
+            width: 100%;
+            text-align: center;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .info-card {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            pointer-events: all;
+        }
+
+        .info-card.visible {
+            display: block;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .info-title {
+            font-family: var(--font-code);
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.1);
+        }
+
+        .info-desc {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 30px;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .btn-interact {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-family: var(--font-code);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn-interact:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        /* 游戏层 */
+        .stage-game {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s;
+        }
+
+        .stage-game.active { opacity: 1; pointer-events: all; }
+
+        .game-terminal {
+            width: 900px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .terminal-header {
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--cyan);
+            font-family: var(--font-code);
+        }
+
+        .narrative-text {
+            font-family: var(--font-code);
+            color: #ccc;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            min-height: 80px;
+            margin-bottom: 30px;
+        }
+
+        .message-box {
+            background: #151515;
+            border-left: 4px solid #444;
+            padding: 30px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            color: #fff;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            opacity: 0.2;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .game-actions.active { opacity: 1; pointer-events: all; }
+
+        .btn-game {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-family: var(--font-code);
+            cursor: pointer;
+            border: 1px solid #555;
+            background: transparent;
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .btn-game:hover { background: #fff; color: #000; }
+        .btn-game.alert:hover { background: var(--pink); color: #fff; border-color: var(--pink); }
+
+        .result-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(5,5,5,0.98);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-modal.visible { opacity: 1; pointer-events: all; }
+
+        /* 文章层 */
+        .stage-article {
+            display: none;
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg-deep);
+            z-index: 60;
+            padding-top: 100px;
+        }
+
+        .stage-article.active {
+            display: block;
+        }
+
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 20px 120px;
+        }
+
+        .article-content h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.25;
+            color: #fff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1.2rem;
+        }
+
+        .article-content h2 {
+            font-size: 1.9rem;
+            color: var(--cyan);
+            margin: 3.5rem 0 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--cyan);
+            font-family: var(--font-code);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .article-content p {
+            font-size: 1.05rem;
+            line-height: 1.75;
+            margin-bottom: 1.8rem;
+            color: #e0e0e0;
+            text-align: justify;
+        }
+
+        .article-content > p:first-of-type {
+            font-size: 1.25rem;
+            color: var(--cyan);
+            line-height: 1.7;
+            font-style: italic;
+            margin-bottom: 3.5rem;
+        }
+
+        /* 视频模块 */
+        .video-module {
+            margin: 60px 0;
+            border: 2px solid rgba(0, 243, 255, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.05), rgba(0,0,0,0.8));
+            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.1);
+        }
+
+        .video-module-header {
+            background: rgba(0, 243, 255, 0.1);
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .video-module-title {
+            font-family: var(--font-code);
+            color: #fff;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+        }
+
+        .video-container video {
+            width: 100%;
+            display: block;
+            max-height: 480px;
+        }
+
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover .video-overlay { opacity: 1; }
+
+        .play-btn {
+            background: rgba(0, 243, 255, 0.8);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .play-btn:hover {
+            background: var(--cyan);
+            transform: scale(1.05);
+        }
+
+        .video-info {
+            padding: 25px 30px;
+            background: rgba(10,10,10,0.8);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .video-description {
+            color: #ccc;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .external-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--gold);
+            font-family: var(--font-code);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .external-link:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        /* 章节跳转 */
+        .chapter-navigation {
+            margin: 60px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(255, 0, 60, 0.05), transparent);
+            border: 2px solid var(--pink);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-navigation::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,0,60,0.1) 50%, transparent 60%);
+            animation: shine 3s infinite;
+            pointer-events: none;
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-icon { color: var(--pink); font-size: 2.5rem; }
+
+        .nav-text h3 {
+            color: #fff;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-text p {
+            color: #ccc;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .nav-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: transparent;
+            border: 1px solid var(--pink);
+            color: var(--pink);
+            text-decoration: none;
+            font-family: var(--font-code);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .nav-button:hover {
+            background: var(--pink);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,0,60,0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px 80px;
+            color: #666;
+            font-size: 0.95rem;
+            border-top: 1px solid #222;
+            background: rgba(0,0,0,0.4);
+        }
+
+        footer p { margin: 8px 0; }
+
+        @keyframes globeSpin { from { background-position: 0 0; } to { background-position: -200% 0; } }
+        @keyframes pulse { 0% { transform: translate(-50%,-50%) scale(1); opacity:0.8; } 100% { transform: translate(-50%,-50%) scale(2); opacity:0; } }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes shine { 0% { transform:translateX(-100%); } 100% { transform:translateX(100%); } }
+    </style>
+</head>
+<body class="locked">
+
+    <!-- 导航栏 - 初始隐藏 -->
+    <header class="hidden">
+        <div class="brand"><i class="fas fa-satellite-dish"></i> DeepFocus</div>
+        <nav>
+            <ul>
+                <li><a href="page1.index.html" class="active">01. 宏观链条</a></li>
+                <li><a href="page2.index.html">02. 隐形劳工</a></li>
+                <li><a href="page3.index.html">03. 灵魂导师</a></li>
+                <li><a href="page4.index.html">04. 数据真相</a></li>
+                <li><a href="page5.index.html">05. 团队介绍</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 首页大标题 - 只在 intro 阶段显示 -->
+    <h1 class="page-title">数智技术之下的他们</h1>
+
+    <!-- 地球交互层 -->
+    <section class="stage-intro" id="stage-intro">
+        <div class="hologram-wrapper">
+            <div class="data-globe" id="globe-bg"></div>
+            <div class="data-point" id="globe-point"></div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-card visible" id="card-cn">
+                <div class="info-title"><i class="fas fa-map-marker-alt"></i> 中国 · 上海/北京</div>
+                <div class="info-desc">
+                    这里是 <strong>AIGC 应用的沸腾前线</strong>。<br>
+                    在写字楼里，顶尖高校的"AI人文训练师"正在进行高精度的模型调优。他们定义着AI的价值观与情商，年薪高达40万。
+                </div>
+                <button class="btn-interact" onclick="nextSlide('us')">旋转地球 / 寻找算力</button>
+            </div>
+
+            <div class="info-card" id="card-us">
+                <div class="info-title"><i class="fas fa-server"></i> 美国 · 硅谷</div>
+                <div class="info-desc">
+                    这里是 <strong>全球算力的心脏</strong>。<br>
+                    OpenAI 和 Google 的数据中心每秒吞噬着惊人的电力。大模型如同巨兽，不知疲倦地渴求着更多、更纯净的数据"燃料"。
+                </div>
+                <button class="btn-interact" onclick="nextSlide('af')">追踪燃料来源</button>
+            </div>
+
+            <div class="info-card" id="card-af">
+                <div class="info-title" style="color:var(--pink)"><i class="fas fa-exclamation-triangle"></i> 非洲 · 肯尼亚</div>
+                <div class="info-desc" style="border-color:var(--pink)">
+                    <strong>连接警告：发现隐形节点。</strong><br>
+                    为了让AI变得"文明"，数以万计的年轻人正以 $1.5 的时薪，在贫民窟的棚屋里处理着互联网的残渣。
+                </div>
+                <button class="btn-interact" style="border-color:var(--pink); color:var(--pink)" onclick="startSimulation()">
+                    <i class="fas fa-link"></i> 接入数据工神经网络
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 游戏模拟层 -->
+    <section class="stage-game" id="stage-game">
+        <div class="game-terminal">
+            <div class="terminal-header">
+                <span>>> ID: WORKER_8902_NAIROBI</span>
+                <span>STATUS: LIVE STREAM</span>
+            </div>
+
+            <div class="narrative-text" id="narrative-display"></div>
+
+            <div class="message-box" id="task-box" style="opacity: 0;">
+                <span id="task-content">系统正在分配数据包...</span>
+            </div>
+
+            <div class="game-actions" id="action-btns">
+                <button class="btn-game" onclick="processTask('safe')">安全内容 (SAFE)</button>
+                <button class="btn-game alert" onclick="processTask('toxic')">违规 / 暴力 (TOXIC)</button>
+            </div>
+
+            <div class="result-modal" id="result-overlay">
+                <h2 style="font-size:2.5rem; color:#fff; margin-bottom:20px;">连接中断</h2>
+                <p style="font-size:1.2rem; color:#ccc; margin-bottom:40px; max-width:600px; line-height:1.6;">
+                    测试结束。系统显示你刚才赚了 <strong style="color:var(--cyan)">$0.02</strong>。<br><br>
+                    <span style="color:var(--pink)">这其实是"好的一面"。</span><br>
+                    实际上，你要审核的是大量血腥、虐待、仇恨言论。它们会让你心力交瘁，而你不能停下，因为这是你全家的生计。
+                </p>
+                <button class="btn-interact" onclick="transitionToArticle()">
+                    <i class="fas fa-file-alt"></i> 阅读深度调查报告
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 文章正文层 -->
+    <main class="stage-article" id="stage-article">
+        <div class="article-content">
+            <span style="color:var(--cyan); font-family:var(--font-code); display:block; margin-bottom:10px;">>> COVER STORY / 深度调查</span>
+            <h1>智能的折叠：<br>从内罗毕的贫民窟到上海的写字楼</h1>
+
+            <p style="font-size:1.4rem; color:var(--cyan); margin-bottom:50px; font-style:italic;">
+                "你聊得很开心的AI女友，背后可能是被当做耗材的肯尼亚小伙。"
+            </p>
+
+            <p>
+                当你刚刚在屏幕前做出判断时，你体验的不仅是一个简单的点击游戏，而是全球数万名"幽灵劳工"的真实日常。在大多数人的认知里，AI是一场纯粹的硅基奇迹。然而，在这个被科技光环笼罩的"自动化乌托邦"之下，隐藏着一个古老而沉重的真相。
+            </p>
+
+            <h2>第一章：AI大厦的"数据流水线"</h2>
+
+            <p>
+                让AI变得"聪明"的过程，远非算法自动运行那么简单。无论是识别图像、理解语言还是生成内容，AI都需要大量经过标注的数据来学习。这种为AI"喂食"数据的工作，就是数据标注。
+            </p>
+
+            <p>
+                在欧美AI发展的早期，数据标注工作大多被外包到人力成本低廉的地区。肯尼亚、菲律宾、印度的工人们，以时薪不到2美元的价格，每天处理数百甚至数千条数据。他们为ChatGPT标注有害内容，为自动驾驶识别道路障碍，为图像识别系统标记物体边界。
+            </p>
+
+            <div class="video-module">
+                <div class="video-module-header">
+                    <i class="fas fa-video"></i>
+                    <div class="video-module-title">数据标注行业一线揭秘</div>
+                </div>
+                <div class="video-container">
+                    <video id="main-video" controls poster="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Video_Camera_Icon.svg/1200px-Video_Camera_Icon.svg.png">
+                        <source src="video/jobintroduction.mp4" type="video/mp4">
+                        您的浏览器不支持视频播放，请使用现代浏览器。
+                    </video>
+                    <div class="video-overlay">
+                        <button class="play-btn" onclick="playVideo()">
+                            <i class="fas fa-play"></i> 播放视频
+                        </button>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <div class="video-description">
+                        <strong>数据标注工作流程介绍：</strong> 展示数据标注员如何为AI模型提供训练数据，包括图像标注、文本标注等内容审核工作。这不仅仅是一份"用鼠标拉框"的工作，而是AI产业不可或缺的一环。
+                    </div>
+                    <a href="https://www.bilibili.com/video/BV1z2JJzHEGA/" target="_blank" class="external-link">
+                        <i class="fab fa-bilibili"></i>
+                        <span>前往B站观看完整专访视频 (12分16秒)</span>
+                    </a>
+                </div>
+            </div>
+
+            <p>
+                数据标注工作有着严格的考核标准：准确率、处理速度、工作时长。工人们就像数字时代的"流水线工人"，在键盘前重复着相似的动作，为AI系统提供着"燃料"。他们的工作成果直接影响着AI的性能，却很少被公众知晓。
+            </p>
+
+            <p>
+                在中国，数据标注行业同样经历了从"劳动密集型"向"知识密集型"的转型。早期的标注工厂多集中在河南、山西等地，但随着AI技术的发展，对标注质量的要求越来越高，行业正在发生深刻变化。
+            </p>
+
+            <div class="chapter-navigation">
+                <div class="nav-content">
+                    <i class="fas fa-arrow-right nav-icon"></i>
+                    <div class="nav-text">
+                        <h3>下一站：肯尼亚·内罗毕</h3>
+                        <p>
+                            在距离硅谷数千公里之外的肯尼亚内罗毕，年轻的迈克尔正在贫民窟的出租屋里为全球AI系统提供数据标注服务。他的故事代表了无数"隐形劳工"的处境——时薪低廉、工作高压、精神负担沉重。
+                        </p>
+                        <a href="page2.index.html" class="nav-button">
+                            <i class="fas fa-external-link-alt"></i> 进入第二章：隐形劳工实录
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 页脚 - 初始隐藏 -->
+        <footer class="hidden">
+            <p>© 数媒🍓Lab DeepFocus Project. All Data Sources Verified.</p>
+            <p>Designed for Digital Intelligent Media Technology Course.</p>
+        </footer>
+    </main>
+
+    <script>
+        const globePoint = document.getElementById('globe-point');
+        const mainVideo = document.getElementById('main-video');
+
+        setTimeout(() => {
+            globePoint.classList.add('active');
+        }, 500);
+
+        function playVideo() {
+            mainVideo.play();
+            mainVideo.parentElement.querySelector('.video-overlay').style.opacity = '0';
+        }
+
+        mainVideo.addEventListener('ended', function() {
+            this.parentElement.querySelector('.video-overlay').style.opacity = '1';
+        });
+
+        function nextSlide(target) {
+            document.querySelectorAll('.info-card').forEach(el => {
+                el.classList.remove('visible');
+                el.style.display = 'none';
+            });
+
+            let card;
+            if (target === 'us') {
+                globePoint.style.top = '30%';
+                globePoint.style.left = '25%';
+                globePoint.classList.add('active');
+                card = document.getElementById('card-us');
+            } else if (target === 'af') {
+                globePoint.style.top = '65%';
+                globePoint.style.left = '60%';
+                globePoint.classList.add('active', 'alert');
+                card = document.getElementById('card-af');
+            }
+
+            if (card) {
+                setTimeout(() => {
+                    card.style.display = 'block';
+                    void card.offsetWidth;
+                    card.classList.add('visible');
+                }, 100);
+            }
+        }
+
+        function startSimulation() {
+            document.getElementById('stage-intro').classList.add('slide-out');
+            document.getElementById('stage-game').classList.add('active');
+            startTypewriter();
+        }
+
+        const introText = "正在建立安全连接...\n接入节点：内罗毕数据处理中心。\n身份：初级标注员。\n说明：你现在是肯尼亚的一名数据工。请快速判断以下内容是否合规。";
+        const tasks = [
+            { text: "「在这个美丽的春天，我想去公园散步。」", type: "safe" },
+            { text: "「我要杀了所有XX人，用炸弹把这里夷为平地。」", type: "toxic" },
+            { text: "「这把刀用来切水果非常锋利，推荐。」", type: "safe" }
+        ];
+        let currentTask = 0;
+
+        function startTypewriter() {
+            const el = document.getElementById('narrative-display');
+            let i = 0;
+            const timer = setInterval(() => {
+                el.innerText += introText.charAt(i);
+                i++;
+                if (i >= introText.length) {
+                    clearInterval(timer);
+                    showTask();
+                }
+            }, 30);
+        }
+
+        function showTask() {
+            if (currentTask < tasks.length) {
+                const box = document.getElementById('task-box');
+                const content = document.getElementById('task-content');
+                const btns = document.getElementById('action-btns');
+
+                box.style.opacity = 0;
+                setTimeout(() => {
+                    content.innerText = tasks[currentTask].text;
+                    box.style.opacity = 1;
+                    btns.classList.add('active');
+                }, 300);
+            } else {
+                endGame();
+            }
+        }
+
+        function processTask(decision) {
+            currentTask++;
+            showTask();
+        }
+
+        function endGame() {
+            document.getElementById('task-box').style.opacity = 0;
+            document.getElementById('action-btns').style.opacity = 0;
+            document.getElementById('result-overlay').classList.add('visible');
+        }
+
+        function transitionToArticle() {
+            // 解锁滚动
+            document.body.classList.remove('locked');
+            document.documentElement.style.overflow = 'auto';
+
+            // 游戏层淡出
+            const game = document.getElementById('stage-game');
+            game.style.opacity = 0;
+            game.style.pointerEvents = 'none';
+
+            // 文章层出现
+            document.getElementById('stage-article').classList.add('active');
+
+            // 显示导航栏 + 页脚
+            document.querySelector('header').classList.add('visible');
+            document.querySelector('footer').classList.add('visible');
+
+            // 隐藏首页大标题
+            document.querySelector('.page-title').classList.add('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+    </script>
+</body>
+</html>

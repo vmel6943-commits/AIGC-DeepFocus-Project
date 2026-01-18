@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="隐形劳工实录：数字贫民窟里的幽灵 - DeepFocus 结课作品 Page 2">
+    <meta name="keywords" content="数字媒体, AIGC, 隐形劳工, 数据标注, 逆向图灵测试">
+    <meta name="author" content="DeepFocus Team">
+    <title>档案 02: 隐形劳工 | DeepFocus</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Share+Tech+Mono&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 全局变量与重置 (Variables & Reset) --- */
+        :root {
+            --bg-deep: #020202;
+            --text-main: #f0f0f0;
+            --text-dim: #a0a0a0;
+            --cyan: #00f3ff;
+            --cyan-dim: rgba(0, 243, 255, 0.2);
+            --pink: #ff003c;
+            --gold: #ffd700;
+            --font-main: 'Noto Serif SC', serif;
+            --font-code: 'Share Tech Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* CSS框模型 */
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            font-size: 18px;
+            line-height: 1.8;
+            overflow-x: hidden;
+            /* 背景噪点纹理 */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+
+        /* 通用动画类 */
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- 导航栏 (Navigation) --- */
+        header {
+            position: fixed; top: 0; width: 100%; height: 70px;
+            background: rgba(2, 2, 2, 0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15); z-index: 3000;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 40px;
+            transition: all 0.3s ease;
+        }
+        header.scrolled { background: rgba(2, 2, 2, 0.95); box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); }
+
+        .brand {
+            font-family: var(--font-code); color: var(--cyan); font-size: 1.5rem; letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--cyan-dim); transition: 0.3s;
+        }
+        .brand:hover { text-shadow: 0 0 15px var(--cyan); transform: scale(1.05); }
+
+        nav ul { display: flex; gap: 30px; list-style: none; }
+        nav a { 
+            color: #888; text-decoration: none; font-size: 0.95rem; font-weight: bold; 
+            transition: 0.3s; position: relative; padding: 5px 0; font-family: var(--font-code);
+        }
+        nav a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+            background: var(--cyan); transition: width 0.3s ease;
+        }
+        nav a:hover::after, nav a.active::after { width: 100%; }
+        nav a:hover, nav a.active { color: #fff; text-shadow: 0 0 8px var(--cyan); }
+
+        /* --- Hero Section (首屏) --- */
+        .hero-section {
+            height: 90vh; min-height: 600px; display: flex; align-items: center; justify-content: center;
+            position: relative; padding-top: 70px;
+            background: radial-gradient(circle at 50% 40%, #1a0505 0%, #000 70%);
+            overflow: hidden;
+        }
+
+        .hero-layout {
+            display: flex; align-items: center; justify-content: center; gap: 60px;
+            max-width: 1100px; width: 100%; z-index: 10; padding: 0 20px;
+        }
+
+        .hero-text { flex: 1; max-width: 500px; animation: slideInLeft 1s ease-out; }
+        .hero-label { 
+            font-family: var(--font-code); color: var(--cyan); font-size: 0.9rem; 
+            margin-bottom: 15px; display: block; letter-spacing: 1px; animation: flicker 2s infinite alternate;
+        }
+        
+        .hero-text h1 { 
+            font-size: 3.5rem; line-height: 1.1; margin-bottom: 25px; font-weight: 700; color: #fff; 
+            text-shadow: 2px 2px 0px rgba(255,0,60,0.2); position: relative;
+        }
+        .hero-text h1::after {
+            content: ''; position: absolute; bottom: -10px; left: 0; width: 100px; height: 3px;
+            background: linear-gradient(90deg, var(--pink), var(--cyan));
+        }
+        
+        .hero-text p { 
+            font-size: 1.1rem; color: var(--text-dim); margin-bottom: 40px; 
+            border-left: 3px solid var(--cyan); padding-left: 20px; transition: 0.3s;
+        }
+        .hero-text p:hover { border-left-width: 6px; padding-left: 25px; color: #fff; }
+
+        /* 扫描按钮 */
+        .btn-scan {
+            background: transparent; border: 1px solid var(--pink); color: var(--pink);
+            padding: 15px 35px; font-family: var(--font-code); font-size: 1rem;
+            cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px; position: relative; overflow: hidden;
+        }
+        .btn-scan::before {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: var(--pink); border-radius: 50%; transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s; z-index: -1;
+        }
+        .btn-scan:hover::before { width: 350px; height: 350px; }
+        .btn-scan:hover { color: #000; box-shadow: 0 0 30px rgba(255, 0, 60, 0.4); }
+
+        /* 卡片交互区 */
+        .card-wrapper { 
+            position: relative; width: 320px; height: 480px; flex-shrink: 0; 
+            animation: slideInRight 1s ease-out 0.3s both;
+        }
+        
+        .id-card {
+            width: 100%; height: 100%; background: #000; border: 1px solid #333;
+            border-radius: 4px; position: relative; overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: 0.5s;
+        }
+        .id-card:hover { transform: translateY(-10px); box-shadow: 0 40px 80px rgba(0,0,0,0.9), 0 0 30px rgba(0, 243, 255, 0.2); }
+
+        .persona-img {
+            width: 100%; height: 100%; background-size: cover; background-position: center;
+            position: absolute; top: 0; left: 0; transition: opacity 0.5s;
+        }
+        .img-ai { background-image: url('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800'); z-index: 2; }
+        .img-human { background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800'); filter: grayscale(100%) contrast(1.5); z-index: 1; }
+
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--pink); box-shadow: 0 0 15px var(--pink); z-index: 10; display: none;
+        }
+        .scanning .scan-line { display: block; animation: scanDown 2s ease-in-out infinite; }
+        
+        .scan-result {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95); border: 1px solid var(--pink); color: var(--pink);
+            padding: 20px; text-align: center; font-family: var(--font-code); font-size: 1rem;
+            z-index: 20; display: none; width: 90%; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        /* --- 文章主体 (Article) --- */
+        .article-body { max-width: 800px; margin: 0 auto; padding: 60px 20px 120px 20px; }
+
+        .intro-lead { 
+            font-size: 1.35rem; color: var(--cyan); margin-bottom: 50px; line-height: 1.6; 
+            font-style: italic; border-bottom: 1px solid #333; padding-bottom: 30px;
+        }
+
+        .chapter-title {
+            font-size: 1.8rem; color: var(--cyan); margin: 3.5rem 0 1.5rem 0;
+            padding-bottom: 0.75rem; border-bottom: 2px solid var(--cyan);
+            font-family: var(--font-code); text-transform: uppercase; letter-spacing: 1px;
+            position: relative; transition: 0.3s;
+        }
+        .chapter-title::before {
+            content: '>'; position: absolute; left: -20px; opacity: 0; transition: 0.3s;
+        }
+        .chapter-title:hover { color: #fff; padding-left: 15px; }
+        .chapter-title:hover::before { opacity: 1; left: -10px; }
+
+        p { margin-bottom: 1.8rem; color: #e0e0e0; text-align: justify; line-height: 1.8; }
+
+        .quote-box {
+            background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--cyan);
+            padding: 30px 40px; margin: 40px 0; font-style: italic; color: #fff;
+        }
+
+        .highlight-box {
+            border: 2px solid var(--cyan); background: rgba(0, 243, 255, 0.05);
+            padding: 40px; margin: 50px 0; position: relative; transition: 0.3s;
+        }
+        .highlight-box:hover { background: rgba(0, 243, 255, 0.1); transform: scale(1.02); }
+        .highlight-box::before {
+            content: 'DATA_INSIGHT'; position: absolute; top: -12px; left: 20px;
+            background: var(--bg-deep); color: var(--cyan); padding: 0 10px;
+            font-family: var(--font-code); font-size: 0.8rem;
+        }
+
+        /* --- 有毒数据交互块 --- */
+        .toxic-container {
+            border: 1px solid #333; overflow: hidden; margin: 60px 0;
+            background: #0a0a0a; transition: 0.3s;
+        }
+        .toxic-container:hover { border-color: #555; box-shadow: 0 0 20px rgba(255, 0, 60, 0.1); }
+        
+        .toxic-header { 
+            padding: 15px 25px; border-bottom: 1px solid #222; font-family: var(--font-code);
+            font-size: 0.9rem; color: #666; display: flex; justify-content: space-between; background: #111;
+        }
+        .toxic-body { padding: 30px; }
+        
+        .blur-line {
+            padding: 15px 0; border-bottom: 1px dashed #222; cursor: help;
+            display: flex; align-items: center; transition: 0.3s;
+        }
+        .blur-line:hover { background: rgba(255, 0, 60, 0.05); transform: translateX(5px); }
+        
+        .blur-mask {
+            background: #151515; color: transparent; text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transition: 0.4s; padding: 5px 10px; border-radius: 2px; margin-left: 15px;
+            font-family: var(--font-code); font-size: 0.9rem; position: relative;
+        }
+        .blur-line:hover .blur-mask {
+            background: rgba(255, 0, 60, 0.1); color: var(--pink); text-shadow: none;
+        }
+
+        /* --- 中国板块 (表格与手机交互) --- */
+        .china-section {
+            background: #111; padding: 50px; margin-top: 80px; border: 1px solid #222;
+            position: relative; transition: 0.3s;
+        }
+        .china-section:hover { border-color: #444; box-shadow: 0 0 30px rgba(0, 243, 255, 0.1); }
+
+        .china-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 50px; align-items: center; }
+        
+        /* 手机模型 */
+        .phone-mockup {
+            width: 260px; height: 520px; background: #000; border: 8px solid #333;
+            border-radius: 36px; position: relative; margin: 0 auto; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); transition: 0.5s;
+        }
+        .phone-mockup:hover { transform: rotate(2deg) scale(1.02); border-color: #555; }
+        
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 25px; background: #333; border-radius: 0 0 12px 12px; z-index: 10;
+        }
+        
+        .phone-screen {
+            width: 100%; height: 100%; background: #151515; position: relative;
+            cursor: pointer; overflow: hidden;
+        }
+        
+        .screen-content {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0; transition: opacity 0.5s ease;
+        }
+        .screen-content.active { opacity: 1; }
+        
+        .slide-indicators {
+            position: absolute; bottom: 15px; width: 100%;
+            display: flex; justify-content: center; gap: 8px; z-index: 20;
+        }
+        .slide-indicators .dot {
+            width: 6px; height: 6px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s;
+        }
+        .slide-indicators .dot.active { background: #fff; transform: scale(1.2); }
+        
+        .touch-hint {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.9); font-size: 0.8rem; pointer-events: none;
+            background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 20px;
+            opacity: 0; transition: 0.3s; display: flex; align-items: center; gap: 5px;
+            white-space: nowrap; font-family: var(--font-code); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .phone-screen:hover .touch-hint { opacity: 1; }
+
+        /* 标准化数据表格 (代替 div 图表) */
+        .data-table {
+            width: 100%; border-collapse: collapse; margin-top: 40px;
+            font-family: var(--font-code);
+        }
+        .data-table caption { text-align: left; color: #fff; margin-bottom: 15px; font-size: 1.1rem; }
+        .data-table td { padding: 12px 0; vertical-align: middle; }
+        .data-table .label-cell { width: 30%; color: #888; font-size: 0.9rem; }
+        .data-table .value-cell { width: 15%; text-align: right; color: #fff; font-weight: bold; }
+        .data-table .bar-cell { width: 55%; padding-left: 15px; }
+        
+        .progress-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0; transition: width 1.5s ease; border-radius: 4px; }
+
+        /* --- 下一章跳转模块 --- */
+        .next-chapter-box {
+            border: 2px solid var(--pink);
+            background: linear-gradient(to right, rgba(255, 0, 60, 0.05), rgba(255, 0, 60, 0.02));
+            padding: 30px 40px; margin: 50px 0; border-radius: 2px;
+            transition: 0.3s; cursor: pointer; display: block; text-decoration: none;
+        }
+        .next-chapter-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 0, 60, 0.2);
+            background: linear-gradient(to right, rgba(255, 0, 60, 0.1), rgba(255, 0, 60, 0.05));
+        }
+
+      footer {
+    text-align: center;
+    padding: 40px 20px 80px;
+    color: #666;
+    font-size: 0.95rem;
+    border-top: 1px solid #222;
+    background: rgba(0,0,0,0.4);
+    
+    /* 加强居中：用 flex 布局 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;           /* 两个 p 之间的间距，更可控 */
+}
+
+footer p {
+    margin: 0;          /* 清除浏览器默认 margin，避免偏移 */
+}
+
+
+        /* --- 关键帧动画 (Keyframes) --- */
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes scanDown { 0% { top: 0; } 100% { top: 100%; } }
+        @keyframes pulse { from { box-shadow: 0 0 5px var(--pink); } to { box-shadow: 0 0 20px var(--pink); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* 移动端适配 */
+        @media (max-width: 900px) {
+            .hero-layout, .china-grid { flex-direction: column; text-align: left; }
+            .hero-section { height: auto; padding: 100px 20px 60px; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .phone-mockup { margin-top: 40px; }
+            .data-table .label-cell { display: block; width: 100%; }
+            .data-table .bar-cell { display: block; width: 100%; padding-left: 0; margin-bottom: 10px; }
+            .data-table .value-cell { display: none; } /* 移动端隐藏数值列，保持简洁 */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand"><i class="fas fa-satellite-dish"></i> DeepFocus</div>
+        <nav>
+            <ul>
+                <li><a href="page1.index.html">01. 宏观链条</a></li>
+                <li><a href="#" class="active">02. 隐形劳工</a></li>
+                <li><a href="page3.index.html">03. 灵魂导师</a></li>
+                <li><a href="page4.index.html">04. 数据真相</a></li>
+                <li><a href="page5.index.html">05. 制作团队</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-layout">
+            <div class="hero-text">
+                <span class="hero-label">>> SYSTEM ALERT: REVERSE TURING TEST</span>
+                <h1>当人类被迫<br>伪装成AI</h1>
+                <p>
+                    曾经，AI 努力通过图灵测试，证明自己像人。<br>
+                    现在，居然涌现出了假扮"AI恋人"的新职业<br>
+                </p>
+                
+                <button class="btn-scan" onclick="runTuringTest()">
+                    <i class="fas fa-microchip"></i> 运行检测 (SCAN IDENTITY)
+                </button>
+            </div>
+
+            <div class="card-wrapper">
+                <div class="id-card">
+                    <div class="persona-img img-human"></div> 
+                    <div class="persona-img img-ai" id="ai-layer"></div> 
+                    <div class="scan-line" id="scan-line"></div>
+                    
+                    <div class="scan-result" id="scan-result">
+                        <i class="fas fa-exclamation-triangle"></i><br><br>
+                        ERROR: BIOLOGICAL LIFEFORM DETECTED<br>
+                        <span style="font-size:0.8rem; color:#fff; margin-top:10px; display:block;">ID: Michael (Human) | Location: Nairobi</span>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px; font-family: var(--font-code); color: #666; font-size: 0.8rem;">
+                    TARGET: Jessica (Virtual Companion)
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <article class="article-body">
+        
+        <p class="intro-lead">
+            "你聊得很开心的AI女友，背后却是被当做耗材的肯尼亚小伙们。"
+        </p>
+
+        <p class="fade-in">
+            这并非虚构故事，而是AI时代全球产业链的真实切片。根据国际研究项目<strong>Data Worker's Inquiry</strong>披露的案例，肯尼亚内罗毕的迈克尔·杰弗里·亚细亚（Michael Geoffrey Asia）在贫民窟的出租屋里，正以每分钟40字的速度，同时扮演三个"AI虚拟女友"。
+        </p>
+
+        <h2 class="chapter-title fade-in">01. 逆向图灵测试：当人类必须证明自己像AI</h2>
+
+        <p class="fade-in">
+            迈克尔很快发现，这份工作并不像招聘描述那么简单。他实际上是在一家典型的外包公司工作：注册地址在澳大利亚墨尔本，实际运营中心在菲律宾，同时在肯尼亚、印度等地招募远程员工。公司的主营业务名为"AI for Dating"——出售可以约会聊天的数字人。
+        </p>
+
+        <div class="quote-box fade-in">
+            "这根本不是什么高科技。我必须同时扮演好几个角色。上一秒我是在澳洲海滩晒太阳的Jessica，下一秒我就变成了在美国留学的Celine。我是一名直男，但我必须熟练地向陌生男性撒娇、示爱。"
+        </div>
+
+        <p class="fade-in">
+            在贫民窟昏暗的出租屋里，凌晨三点的灯光下，迈克尔要在三四个虚构身份间切换。他的每分钟打字量必须超过40个，必须在规定时间内回复用户消息，必须保证用户的留存率——一切都被关键绩效指标严格监控。
+        </p>
+
+        <h2 class="chapter-title fade-in">02. 数字清洁工：互联网下水道的清理者</h2>
+
+        <p class="fade-in">
+            除了假扮AI恋人，另一项更为沉重的AI产业底层工作是内容审核。为了让ChatGPT等大模型变得"文明"，OpenAI等公司需要有人先去识别那些最肮脏、最暴力的数据。
+        </p>
+
+        <div class="toxic-container fade-in">
+            <div class="toxic-header">
+                <span><i class="fas fa-shield-alt"></i> 敏感内容过滤日志 (HOVER TO VIEW)</span>
+                <span>STATUS: FLAGGED</span>
+            </div>
+            <div class="toxic-body">
+                <div class="blur-line">
+                    <span style="font-family:var(--font-code); color:#555; margin-right:15px;">DATA_01</span>
+                    <span class="blur-mask">[文本] 详细的土制炸弹制作教程与化学公式...</span>
+                </div>
+                <div class="blur-line">
+                    <span style="font-family:var(--font-code); color:#555; margin-right:15px;">DATA_02</span>
+                    <span class="blur-mask">[图片] 战乱地区极度暴力的血腥现场...</span>
+                </div>
+                <div class="blur-line">
+                    <span style="font-family:var(--font-code); color:#555; margin-right:15px;">DATA_03</span>
+                    <span class="blur-mask">[视频] 针对儿童/弱势群体的虐待行为记录...</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="chapter-title fade-in">03. 全球幽灵劳工：自动化乌托邦的月之暗面</h2>
+
+        <p class="fade-in">
+            这种"人类即服务"的模式并非个例。在印度，1000多名工人躲在摄像头背后，为亚马逊的"无人零售店"审核每一笔交易；在菲律宾，工人们远程操控着加拿大的网红送餐机器人Geoffrey。
+        </p>
+
+        <div class="highlight-box fade-in">
+            <p style="color: #fff; font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px;">
+                <strong>产业链透视：</strong> AI时代，这套玩法被原封不动搬了回来——注册地在发达国家用来背书和融资，实际工作地在人力成本极低的发展中国家用来压缩成本。
+            </p>
+        </div>
+
+        <h2 class="chapter-title fade-in">04. 中国的数据标注：从"AI工厂"到"新石油"</h2>
+
+        <p class="fade-in">
+            这种模式在中国也留下了深刻痕迹。2015年至2020年，数据标注公司常被称为"AI工厂"。在河南、山西等地的县城，涌现出大量数据标注基地。
+        </p>
+
+        <section class="china-section fade-in">
+            <div class="china-grid">
+                <div>
+                    <h3 style="color:#fff; margin-bottom:20px; font-size:1.6rem;">小红书上的"赛博厂妹"与产业升级</h3>
+                    <p>
+                        打开小红书，搜索"数据标注"，你会看到大量从业者的真实吐槽。他们自嘲为"赛博厂妹"或"AI时代的纺织工"："做了一天拉框，眼睛都要瞎了，这真的是AI吗？"
+                    </p>
+                    
+                    <table class="data-table">
+                        <caption><i class="fas fa-chart-bar"></i> 全球AI劳工时薪对比</caption>
+                        <tbody>
+                            <tr>
+                                <td class="label-cell">肯尼亚 AI陪伴</td>
+                                <td class="bar-cell">
+                                    <div class="progress-bg">
+                                        <div class="progress-bar" style="width:10%; background:var(--pink)" id="bar1"></div>
+                                    </div>
+                                </td>
+                                <td class="value-cell">$1.5/h</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">中国 基础标注</td>
+                                <td class="bar-cell">
+                                    <div class="progress-bg">
+                                        <div class="progress-bar" style="width:30%; background:var(--gold)" id="bar2"></div>
+                                    </div>
+                                </td>
+                                <td class="value-cell">¥20/h</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">中国 人文训练师</td>
+                                <td class="bar-cell">
+                                    <div class="progress-bg">
+                                        <div class="progress-bar" style="width:60%; background:var(--cyan)" id="bar3"></div>
+                                    </div>
+                                </td>
+                                <td class="value-cell">¥200+/h</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen" id="phone-screen-interactive">
+                        <img src="picture/redbook1.jpg" alt="Redbook Post 1" class="screen-content active">
+                        <img src="picture/redbook2.jpg" alt="Redbook Post 2" class="screen-content">
+                        
+                        <div class="slide-indicators">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <div class="touch-hint"><i class="fas fa-fingerprint"></i> 点击切换图片</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <a href="page3.index.html" class="next-chapter-box fade-in">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <i class="fas fa-arrow-right" style="color: var(--pink); font-size: 1.5rem; margin-right: 15px;"></i>
+                <h3 style="color: #fff; font-size: 1.5rem; margin: 0;">下一站：中国的AI人文训练师</h3>
+            </div>
+            <p style="color: #ccc; line-height: 1.6; margin-bottom: 20px;">
+                当"耗材"试图变成"老师"，当数据标注从体力劳动升级为知识工作，我们见证的不仅是个体命运的差异，更是全球技术权力结构的变化。
+            </p>
+            <span style="
+                display: inline-block; padding: 10px 25px; border: 1px solid var(--pink);
+                color: var(--pink); font-family: var(--font-code); font-size: 0.9rem; letter-spacing: 1px;
+            ">
+                <i class="fas fa-external-link-alt"></i> 进入第三章：灵魂导师
+            </span>
+        </a>
+
+    </article>
+
+<footer >
+    <p>&copy; 数媒🍓Lab DeepFocus Project. All Data Sources Verified.</p>
+    <p>Designed for Digital Intelligent Media Technology Course.</p>
+</footer>
+
+    <script>
+        // 1. 逆向图灵测试动画逻辑
+        function runTuringTest() {
+            const aiLayer = document.getElementById('ai-layer');
+            const scanLine = document.getElementById('scan-line');
+            const result = document.getElementById('scan-result');
+            const btn = document.querySelector('.btn-scan');
+
+            document.querySelector('.id-card').classList.add('scanning');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 扫描中 (SCANNING)...';
+            btn.style.opacity = '0.7';
+            
+            setTimeout(() => {
+                result.style.display = 'block';
+                setTimeout(() => {
+                    aiLayer.style.opacity = '0';
+                    document.querySelector('.id-card').classList.remove('scanning');
+                    scanLine.style.display = 'none';
+                    result.style.border = "2px solid #fff";
+                    result.style.color = "#fff";
+                    btn.innerHTML = "测试完成：人类确认";
+                    btn.style.borderColor = "#fff";
+                    btn.style.color = "#fff";
+                    btn.style.opacity = '1';
+                    btn.disabled = true;
+                }, 1500);
+            }, 2000);
+        }
+
+        // 2. 小红书图片轮播逻辑
+        const redbookImages = document.querySelectorAll('.screen-content');
+        const dots = document.querySelectorAll('.slide-indicators .dot');
+        let currentSlide = 0;
+
+        function switchSlide() {
+            if (redbookImages.length === 0) return;
+            redbookImages[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            
+            currentSlide = (currentSlide + 1) % redbookImages.length;
+            
+            redbookImages[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        // 自动播放定时器
+        let slideInterval = setInterval(switchSlide, 3000);
+
+        // 点击屏幕切换交互
+        const phoneScreen = document.getElementById('phone-screen-interactive');
+        if (phoneScreen) {
+            phoneScreen.addEventListener('click', () => {
+                clearInterval(slideInterval); // 用户点击后重置计时
+                switchSlide();
+                slideInterval = setInterval(switchSlide, 3000);
+            });
+        }
+
+        // 3. 滚动动画侦测 (IntersectionObserver)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // 当滑动到表格区域时，触发进度条增长动画
+                    if (entry.target.classList.contains('china-section')) {
+                        setTimeout(() => {
+                            const b1 = document.getElementById('bar1'); if(b1) b1.style.width = '10%';
+                        }, 300);
+                        setTimeout(() => {
+                            const b2 = document.getElementById('bar2'); if(b2) b2.style.width = '30%';
+                        }, 600);
+                        setTimeout(() => {
+                            const b3 = document.getElementById('bar3'); if(b3) b3.style.width = '60%';
+                        }, 900);
+                    }
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.fade-in, .china-section').forEach(el => observer.observe(el));
+        
+        // 4. 导航栏滚动毛玻璃效果增强
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+    </script>
+</body>
+</html>

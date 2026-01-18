@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI人文训练师：给机器注入灵魂 - DeepFocus 结课作品 Page 3">
+    <meta name="keywords" content="AI训练师, 数据标注, 情感计算, 灵魂导师, 科技伦理">
+    <meta name="author" content="DeepFocus Team">
+    <title>档案 03: 灵魂导师 | DeepFocus</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Share+Tech+Mono&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 全局变量与重置 (Variables & Reset) --- */
+        :root {
+            --bg-void: #050505;
+            --text-main: #e0e0e0;
+            --cyan: #00f3ff;
+            --cyan-glow: rgba(0, 243, 255, 0.4);
+            --gold: #ffd700;
+            --gold-glow: rgba(255, 215, 0, 0.6);
+            --pink: #ff003c;
+            --font-serif: 'Noto Serif SC', serif;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-hand: 'Ma Shan Zheng', cursive;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; } /* CSS 框模型 */
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-main);
+            font-family: var(--font-serif);
+            line-height: 1.8;
+            overflow-x: hidden;
+            /* 网格背景纹理 */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+        /* --- 导航栏 (Navigation) --- */
+        header {
+            position: fixed; top: 0; width: 100%; height: 70px;
+            background: rgba(5, 5, 5, 0.9); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 40px;
+        }
+        .brand { font-family: var(--font-mono); color: var(--cyan); font-size: 1.2rem; letter-spacing: 2px; }
+        
+        nav ul { display: flex; gap: 30px; list-style: none; }
+        nav a { 
+            color: #666; text-decoration: none; font-size: 0.9rem; font-weight: bold; 
+            transition: 0.3s; font-family: var(--font-mono); text-transform: uppercase;
+            position: relative; padding: 5px 0;
+        }
+        nav a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 1px; background: var(--cyan); transition: width 0.3s ease;
+        }
+        nav a:hover, nav a.active { color: #fff; text-shadow: 0 0 8px var(--cyan-glow); }
+        nav a:hover::after, nav a.active::after { width: 100%; }
+
+        /* --- Hero Section (粒子与滑块) --- */
+        .hero-section {
+            height: 90vh; min-height: 700px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; padding-top: 70px;
+            background: radial-gradient(circle at 50% 40%, #051a1a 0%, #000 70%);
+            overflow: hidden;
+        }
+
+        #particle-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+        }
+
+        .tuner-layout {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+            max-width: 1200px; width: 90%; align-items: center; z-index: 10;
+        }
+
+        .tuner-controls h1 { 
+            font-size: 3.5rem; line-height: 1.1; margin-bottom: 30px; font-weight: 700; color: #fff; 
+            text-shadow: 2px 2px 0px rgba(0, 243, 255, 0.2);
+        }
+        .tuner-intro { 
+            font-size: 1.2rem; color: #aaa; margin-bottom: 40px; 
+            border-left: 3px solid var(--cyan); padding-left: 20px; 
+        }
+
+        /* 调音台滑块样式 */
+        .tuning-slider-container {
+            margin-top: 30px; padding: 30px; 
+            background: rgba(10, 10, 10, 0.7);
+            border: 1px solid #333; border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative; backdrop-filter: blur(5px);
+            transition: border-color 0.3s;
+        }
+        .tuning-slider-container.active-gold {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+        }
+
+        .slider-header { 
+            display: flex; justify-content: space-between; font-family: var(--font-mono); 
+            color: var(--cyan); margin-bottom: 20px; font-size: 0.9rem;
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 6px; background: #222; border-radius: 3px; outline: none;
+            position: relative; z-index: 20;
+            background-image: linear-gradient(90deg, var(--cyan) 0%, #222 0%);
+            background-repeat: no-repeat;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 32px; height: 32px; 
+            border-radius: 50%; background: #000; border: 2px solid var(--cyan);
+            cursor: pointer; box-shadow: 0 0 20px var(--cyan);
+            transition: transform 0.1s, border-color 0.3s, box-shadow 0.3s;
+            position: relative; top: -1px;
+        }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
+        
+        input[type=range].gold-thumb::-webkit-slider-thumb {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px var(--gold);
+            background: var(--gold);
+        }
+
+        /* 对比卡片样式 */
+        .comparison-deck {
+            position: relative; height: 500px; background: #000; border-radius: 12px;
+            overflow: hidden; border: 1px solid #333; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .card-panel {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 50px;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .panel-raw { background: #0a0a0a; color: #666; opacity: 1; z-index: 1; }
+        .panel-tuned { 
+            background: radial-gradient(circle at bottom, #0f1515, #000); 
+            color: #fff; opacity: 0; z-index: 2; 
+        }
+
+        .chat-bubble {
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;
+            margin-bottom: 30px; font-family: var(--font-mono); font-size: 0.9rem; color: #888; border-left: 3px solid #333;
+        }
+        
+        .response-text { 
+            font-size: 1.4rem; font-family: '楷体', var(--font-hand), serif; 
+            line-height: 1.6; color: #fff; 
+            filter: blur(5px); opacity: 0.5;
+            transition: all 0.1s linear;
+        }
+        
+        .response-text.gold-mode {
+            color: var(--gold);
+            text-shadow: 0 0 15px var(--gold-glow), 0 0 30px rgba(255, 215, 0, 0.3);
+            font-weight: 500;
+        }
+
+        /* --- 文章通用样式 (Article) --- */
+        .article-body { max-width: 800px; margin: 0 auto; padding: 60px 20px 60px 20px; }
+
+        .chapter-title {
+            font-size: 1.9rem; color: var(--cyan); margin: 3.5rem 0 1.5rem 0;
+            padding-bottom: 0.75rem; border-bottom: 2px solid var(--cyan);
+            font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px;
+        }
+        p { margin-bottom: 1.8rem; color: #e0e0e0; text-align: justify; line-height: 1.75; }
+        
+        .quote-box {
+            background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--gold);
+            padding: 30px 40px; margin: 40px 0; font-style: italic; color: #fff;
+        }
+
+        /* --- 图表组件 (Charts) --- */
+        .comparison-chart {
+            background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+            padding: 40px; margin: 60px 0; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
+        }
+        .comparison-chart::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--pink), var(--gold), var(--cyan));
+        }
+        .chart-header { margin-bottom: 30px; text-align: center; }
+        .chart-row { margin-bottom: 25px; position: relative; }
+        .chart-meta { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: var(--font-mono); font-size: 0.9rem; }
+        .meta-salary.highlight { color: var(--gold); text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+
+        .progress-track { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; }
+        .progress-bar {
+            height: 100%; width: 0; border-radius: 6px; position: relative;
+            background-size: 20px 20px; animation: stripe-move 1s linear infinite;
+        }
+        .bar-low { background-color: var(--pink); background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); }
+        .bar-mid { background-color: #666; }
+        .bar-high { background-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); background-image: linear-gradient(45deg,rgba(255,255,255,.2) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.2) 50%,rgba(255,255,255,.2) 75%,transparent 75%,transparent); }
+        .bar-top { background-color: var(--cyan); background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); }
+        
+        /* --- 战略地图板块 (Map) --- */
+        .strategy-section {
+            background: #000; padding: 0; margin: 100px 0;
+            border-top: 1px solid #222; border-bottom: 1px solid #222;
+        }
+        .strategy-layout {
+            max-width: 1300px; margin: 0 auto;
+            display: grid; grid-template-columns: 1.6fr 1fr; gap: 0;
+            background: #080808; border-left: 1px solid #333; border-right: 1px solid #333;
+        }
+        .map-col { 
+            position: relative; height: 650px; background: #050505; 
+            overflow: hidden; border-right: 1px solid #333; 
+        }
+        .map-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            /* 注意：请确保 picture 目录下有 Chinamap.jpg */
+            background-image: url('picture/Chinamap.jpg');
+            background-size: cover; background-position: center;
+            opacity: 0.4; mix-blend-mode: luminosity; filter: contrast(1.2) brightness(0.8);
+        }
+        .map-dot {
+            position: absolute; width: 12px; height: 12px; background: var(--cyan);
+            border-radius: 50%; cursor: pointer; z-index: 20; transition: 0.3s;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+        .map-dot::before {
+            content: ''; position: absolute; top: -14px; left: -14px; width: 40px; height: 40px;
+            border: 1px solid var(--cyan); border-radius: 50%; animation: ripple 2s infinite; opacity: 0;
+        }
+        .map-dot:hover { background: #fff; transform: scale(1.3); z-index: 30; box-shadow: 0 0 20px #fff; }
+        .map-dot:hover::before { opacity: 1; border-width: 2px; }
+
+        .info-col { 
+            padding: 50px; display: flex; flex-direction: column; justify-content: center; 
+            position: relative; background: radial-gradient(circle at top right, #111, #080808); overflow: hidden; 
+        }
+        .card-tag { font-family: var(--font-mono); color: var(--gold); font-size: 0.85rem; margin-bottom: 15px; border: 1px solid var(--gold); padding: 4px 10px; display: inline-block; }
+        .card-title { font-size: 2.8rem; color: #fff; margin-bottom: 25px; line-height: 1.1; font-weight: 700; }
+        .card-desc { font-size: 1.1rem; color: #aaa; line-height: 1.7; margin-bottom: 40px; border-left: 2px solid var(--cyan); padding-left: 25px; }
+        .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; border-top: 1px solid #222; padding-top: 30px; }
+        .stat-val { font-family: var(--font-mono); font-size: 1.8rem; color: #fff; font-weight: bold; }
+        .stat-key { font-size: 0.85rem; color: #666; text-transform: uppercase; }
+
+        .default-view, .city-detail-view { transition: opacity 0.4s ease, transform 0.4s ease; position: absolute; width: calc(100% - 100px); }
+        .city-detail-view { opacity: 0; transform: translateY(20px); pointer-events: none; }
+        .info-col.active .default-view { opacity: 0; transform: translateY(-20px); }
+        .info-col.active .city-detail-view { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* --- 智者回声 & 结尾组件 --- */
+        .expert-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 50px; perspective: 1000px;
+        }
+        .card-wrap {
+            height: 380px; position: relative; transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); cursor: pointer;
+        }
+        .card-wrap:hover { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 4px; padding: 40px 30px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; border: 1px solid #333; background: #111;
+        }
+        .face-back { background: #0a0a0a; transform: rotateY(180deg); border-color: var(--cyan); text-align: center; }
+        .expert-avatar { width: 90px; height: 90px; border-radius: 50%; background: #222; border: 2px solid var(--cyan); display: flex; align-items: center; justify-content: center; color: var(--cyan); font-size: 2.5rem; margin-bottom: 20px; }
+        .expert-name { font-size: 1.4rem; color: #fff; }
+        .expert-quote { font-style: italic; color: #fff; font-size: 1.1rem; line-height: 1.6; }
+
+        .summary-panel {
+            margin-top: 100px;
+            padding: 50px;
+            background: linear-gradient(135deg, #111, #080808);
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        .summary-title {
+            font-size: 1.8rem; color: #fff; margin-bottom: 20px;
+            font-family: var(--font-mono); display: flex; align-items: center; gap: 15px;
+        }
+        .summary-text { font-size: 1.1rem; color: #ccc; line-height: 1.8; margin-bottom: 40px; }
+
+        .next-link-box {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 30px;
+            background: rgba(255, 0, 60, 0.05);
+            border: 1px solid rgba(255, 0, 60, 0.3);
+            text-decoration: none; color: var(--pink); font-family: var(--font-mono);
+            transition: all 0.3s;
+        }
+        .next-link-box:hover {
+            background: rgba(255, 0, 60, 0.1); border-color: var(--pink); transform: translateX(5px);
+        }
+
+        /* --- Footer (页脚) --- */
+        footer {
+    text-align: center;
+    padding: 40px 20px 80px;
+    color: #666;
+    font-size: 0.95rem;
+    border-top: 1px solid #222;
+    background: rgba(0,0,0,0.4);
+    
+    /* 加强居中：用 flex 布局 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;           /* 两个 p 之间的间距，更可控 */
+}
+
+footer p {
+    margin: 0;          /* 清除浏览器默认 margin，避免偏移 */
+}
+
+        /* --- 动画关键帧 --- */
+        @keyframes stripe-move { 0% { background-position: 0 0; } 100% { background-position: 20px 0; } }
+        @keyframes ripple { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(2.5); border-width: 1px; } }
+        
+        /* 移动端适配 */
+        @media (max-width: 900px) {
+            .tuner-layout { grid-template-columns: 1fr; gap: 40px; }
+            .hero-section { height: auto; padding: 100px 20px 60px; }
+            .strategy-layout { grid-template-columns: 1fr; }
+            .map-col { height: 400px; border-bottom: 1px solid #333; border-right: none; }
+            .info-col { padding: 30px; height: 450px; }
+            .expert-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand"><i class="fas fa-satellite-dish"></i> DeepFocus</div>
+        <nav>
+            <ul>
+                <li><a href="page1.index.html">01. 宏观链条</a></li>
+                <li><a href="page2.index.html">02. 隐形劳工</a></li>
+                <li><a href="#" class="active">03. 灵魂导师</a></li>
+                <li><a href="page4.index.html">04. 数据真相</a></li>
+                <li><a href="page5.index.html">05. 制作团队</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero-section">
+        <canvas id="particle-canvas"></canvas>
+
+        <div class="tuner-layout">
+            <div class="tuner-controls">
+                <span style="font-family:var(--font-mono); color:var(--cyan); margin-bottom:15px; display:block; letter-spacing: 1px;">>> AI HUMANIZER CONSOLE</span>
+                <h1>给机器<br>注入灵魂</h1>
+                <p class="tuner-intro">
+                    在上海的写字楼里，年薪40万的"AI人文训练师"正在做一件事：打破AI的"思想钢印"，教会它什么是真正的美与共情。
+                </p>
+                
+                <div class="tuning-slider-container" id="slider-container">
+                    <div class="slider-header">
+                        <span>含人量 (HUMAN TOUCH)</span>
+                        <span id="slider-val">0%</span>
+                    </div>
+                    <input type="range" id="human-slider" min="0" max="100" value="0">
+                    <p style="font-size:0.8rem; color:#888; margin-top:10px;">拖动滑块，体验从"机器"到"人"的质变</p>
+                </div>
+            </div>
+
+            <div class="comparison-deck">
+                <div class="card-panel panel-raw" id="panel-raw">
+                    <div class="chat-bubble">用户指令：请写一首关于春天的诗</div>
+                    <div class="response-text" style="opacity: 1; filter: blur(0);">
+                        "春天来了，花儿开了。<br>
+                        大自然复苏了，一切都变好了。<br>
+                        我们要开心，因为春天很美丽。"
+                    </div>
+                    <div style="margin-top:20px; font-family:var(--font-mono); font-size:0.8rem; color:#666;">STATUS: MACHINE LOGIC (陈词滥调)</div>
+                </div>
+
+                <div class="card-panel panel-tuned" id="panel-tuned">
+                    <div class="chat-bubble" style="background:rgba(0, 243, 255, 0.1); color:var(--cyan); border-left-color:var(--cyan);">用户指令：请写一首关于春天的诗</div>
+                    <div class="response-text" id="tuned-text">
+                        "一棵稗子提心吊胆的春天，<br>
+                        风吹过，不是算法的指令。<br>
+                        我爱你，<br>
+                        就像代码里唯一的死循环。"
+                    </div>
+                    <div style="margin-top:20px; font-family:var(--font-mono); font-size:0.8rem; color:var(--cyan);" id="status-text">STATUS: HUMANIZED (注入灵魂)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <article class="article-body">
+        
+        <p class="intro-lead fade-in" style="font-size: 1.4rem; color: var(--cyan); margin-bottom: 50px; line-height: 1.6; font-style: italic; border-bottom: 1px solid #333; padding-bottom: 30px;">
+            "当肯尼亚的迈克尔在贫民窟里机械地标记'有毒图片'时，几千公里外的上海写字楼里，一群年轻的'00后'文科硕士正迎来职业生涯的黄金开端。"
+        </p>
+
+        <p class="fade-in">
+            尹框（化名），华东师范大学中文系创意写作专业硕士。如果按部就班，她可能会成为一名语文老师。但现在，她有了一个新身份——<strong>AI人文训练师</strong>，年薪接近40万元。
+        </p>
+
+        <h2 class="chapter-title fade-in">01. 治愈AI的"直男癌"与"平庸症"</h2>
+        
+        <p class="fade-in">
+            尹框的工作不是简单的打标签，而是做"减法"。起初，她发现AI写出的诗充满了"锈迹斑斑的齿轮"、"命运的桎梏"这种陈词滥调，仿佛被打了"思想钢印"。她决定把余秀华的诗喂给模型，教AI理解为什么"一棵稗子"在春天要"提心吊胆"。
+        </p>
+
+        <div class="quote-box fade-in">
+            "当用户说'我失恋了'，传统的AI只会甩出冷冰冰的旅游路线图。而经过训练的AI，会像闺蜜一样先大骂渣男，安抚情绪，然后推荐一个适合哭泣的海边。"<br>
+            <cite>—— 小亚（复旦大学AI人文训练营成员）</cite>
+        </div>
+
+        <div class="comparison-chart fade-in">
+            <div class="chart-header">
+                <h3>全球 AI 产业链价值阶梯</h3>
+                <p>Global AI Value Chain Salary Comparison</p>
+            </div>
+            
+            <div class="chart-row">
+                <div class="chart-meta">
+                    <span class="meta-role"><i class="fas fa-robot" style="color:#555"></i> 肯尼亚数据民工</span>
+                    <span class="meta-salary">$1.5 / hr</span>
+                </div>
+                <div class="progress-track"><div class="progress-bar bar-low" style="width:0%" data-width="5%"></div></div>
+            </div>
+            
+            <div class="chart-row">
+                <div class="chart-meta">
+                    <span class="meta-role"><i class="fas fa-tag" style="color:#888"></i> 中国基础标注员</span>
+                    <span class="meta-salary">¥20 / hr</span>
+                </div>
+                <div class="progress-track"><div class="progress-bar bar-mid" style="width:0%" data-width="15%"></div></div>
+            </div>
+            
+            <div class="chart-row">
+                <div class="chart-meta">
+                    <span class="meta-role"><i class="fas fa-pen-nib" style="color:var(--gold)"></i> AI人文训练师 (上海)</span>
+                    <span class="meta-salary highlight">¥200+ / hr</span>
+                </div>
+                <div class="progress-track"><div class="progress-bar bar-high" style="width:0%" data-width="60%"></div></div>
+            </div>
+            
+            <div class="chart-row">
+                <div class="chart-meta">
+                    <span class="meta-role"><i class="fas fa-code" style="color:var(--cyan)"></i> 硅谷算法工程师</span>
+                    <span class="meta-salary">$100+ / hr</span>
+                </div>
+                <div class="progress-track"><div class="progress-bar bar-top" style="width:0%" data-width="100%"></div></div>
+            </div>
+        </div>
+    </article>
+
+    <section class="strategy-section">
+        <div class="strategy-layout">
+            <div class="map-col">
+                <div class="map-bg"></div>
+                <div class="map-dot" style="top: 32%; left: 70%;" onmouseenter="showCity('beijing')" onmouseleave="hideCity()"></div>
+                <div class="map-dot" style="top: 55%; left: 68%;" onmouseenter="showCity('hefei')" onmouseleave="hideCity()"></div>
+                <div class="map-dot" style="top: 60%; left: 73%;" onmouseenter="showCity('hangzhou')" onmouseleave="hideCity()"></div>
+                <div class="map-dot" style="top: 59%; left: 49%;" onmouseenter="showCity('chengdu')" onmouseleave="hideCity()"></div>
+            </div>
+
+            <div class="info-col" id="info-panel">
+                <div style="position:absolute; top:30px; right:30px; font-family:var(--font-mono); color:#555; font-size:0.75rem;">
+                    <i class="fas fa-crosshairs" style="color:var(--cyan)"></i> DATA VISUALIZATION
+                </div>
+                
+                <div class="default-view">
+                    <span class="card-tag">NATIONAL STRATEGY</span>
+                    <h2 class="card-title">数据标注<br>国家基地</h2>
+                    <p class="card-desc">截至2025年上半年，7个数据标注基地带动数据标注行业相关产值超过83亿元。数据要素正在重塑这片土地的产业逻辑。</p>
+                    <div class="card-stats">
+                        <div><span class="stat-val" style="color:var(--gold)">83亿+</span><span class="stat-key">带动产值</span></div>
+                        <div><span class="stat-val" style="color:var(--cyan)">163个</span><span class="stat-key">服务大模型</span></div>
+                    </div>
+                </div>
+
+                <div class="city-detail-view">
+                    <span class="card-tag" id="d-tag">CITY TAG</span>
+                    <h2 class="card-title" id="d-title">City Name</h2>
+                    <p class="card-desc" id="d-desc">Description text here.</p>
+                    <div class="card-stats">
+                        <div><span class="stat-val" id="d-val1">0</span><span class="stat-key">DATASET</span></div>
+                        <div><span class="stat-val" id="d-val2">0</span><span class="stat-key">LEVEL</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <article class="article-body">
+        <h2 class="chapter-title fade-in">02. 产业折叠：从县城工厂到陆家嘴</h2>
+        <p class="fade-in">
+            这不仅是个体的职业选择，更是国家产业链升级的缩影。2024年底国家发布了《关于促进数据标注产业高质量发展的实施意见》。数据标注产业正在从"劳动密集型"向"知识密集型"飞跃。
+        </p>
+
+        <h2 class="chapter-title fade-in">03. 智者回声：人的价值在哪里？</h2>
+        
+        <div class="expert-grid">
+            <div class="card-wrap fade-in">
+                <div class="card-face face-front">
+                    <div class="expert-avatar"><i class="fas fa-brain"></i></div>
+                    <div class="expert-name">肖仰华</div>
+                    <div class="expert-role">复旦大学教授</div>
+                </div>
+                <div class="card-face face-back">
+                    <i class="fas fa-quote-left" style="color:var(--cyan); font-size:2rem; margin-bottom:15px; opacity:0.5"></i>
+                    <div class="expert-quote">
+                        "AI是巨大的知识容器，但没有目的和意识。人类真正的价值在于智慧——即知道何时、何地、使用何种知识来解决问题。"
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-wrap fade-in">
+                <div class="card-face face-front">
+                    <div class="expert-avatar"><i class="fas fa-lightbulb"></i></div>
+                    <div class="expert-name">李智勇</div>
+                    <div class="expert-role">《无人公司》作者</div>
+                </div>
+                <div class="card-face face-back">
+                    <i class="fas fa-quote-left" style="color:var(--cyan); font-size:2rem; margin-bottom:15px; opacity:0.5"></i>
+                    <div class="expert-quote">
+                        "AI是极致的放大器。前提是你必须有那个'1'——即独特的价值主张。如果没有这个1，个体只是被AI覆盖的0。"
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-wrap fade-in">
+                <div class="card-face face-front">
+                    <div class="expert-avatar"><i class="fas fa-fingerprint"></i></div>
+                    <div class="expert-name">庄明</div>
+                    <div class="expert-role">AI产品经理</div>
+                </div>
+                <div class="card-face face-back">
+                    <i class="fas fa-quote-left" style="color:var(--cyan); font-size:2rem; margin-bottom:15px; opacity:0.5"></i>
+                    <div class="expert-quote">
+                        "AI就像一面镜子，折射出人类的偏见。我们的工作就是站在镜子前，通过打磨，让倒影更符合人类的价值观。"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-panel fade-in">
+            <div class="summary-title">
+                <i class="fas fa-layer-group" style="color:var(--pink)"></i>
+                <span>人性的校准者</span>
+            </div>
+            <div class="summary-text">
+                从肯尼亚贫民窟到上海陆家嘴，我们看到了一条折叠的产业链。AI不仅需要更强的算力，更需要“灵魂”的注入。在这场技术与人文的博弈中，人的价值并未消失，而是被重新定义——我们是机器的校准者，是混乱逻辑中的灯塔，是定义“美”与“善”的最终尺度。
+            </div>
+            
+            <a href="page4.index.html" class="next-link-box">
+                <span>进入下一章：总结与相关资料 (Data Truth)</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+    </article>
+
+    <footer>
+        <p>&copy; 数媒🍓Lab DeepFocus Project. All Data Sources Verified.</p>
+        <p>Designed for Digital Intelligent Media Technology Course.</p>
+    </footer>
+
+    <script>
+        // === 1. 粒子系统与视觉交互 ===
+        const slider = document.getElementById('human-slider');
+        const container = document.getElementById('slider-container');
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resizeCanvas() {
+            const heroSection = document.querySelector('.hero-section');
+            if(heroSection && canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = heroSection.offsetHeight;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color, isGold) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * -5 - 2;
+                this.color = color;
+                this.alpha = 1;
+                this.decay = isGold ? 0.01 : 0.02;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        if(slider) {
+            slider.addEventListener('input', function() {
+                const val = parseInt(this.value);
+                updateTuner(val);
+                
+                const rect = this.getBoundingClientRect();
+                const thumbX = rect.left + (rect.width * (val / 100));
+                const heroRect = document.querySelector('.hero-section').getBoundingClientRect();
+                const relY = rect.top - heroRect.top;
+
+                let color;
+                let isGold = val > 85;
+
+                if (isGold) {
+                    color = `rgba(255, 215, 0, 0.8)`;
+                } else {
+                    const r = Math.floor(0 + (255 - 0) * (val / 100));
+                    const g = Math.floor(243 + (215 - 243) * (val / 100));
+                    const b = Math.floor(255 + (0 - 255) * (val / 100));
+                    color = `rgb(${r},${g},${b})`;
+                }
+
+                const count = Math.floor(val / 10) + 2; 
+                for(let i=0; i<count; i++) {
+                    particles.push(new Particle(thumbX, relY, color, isGold));
+                }
+            });
+        }
+
+        function updateTuner(val) {
+            const raw = document.getElementById('panel-raw');
+            const tuned = document.getElementById('panel-tuned');
+            const tunedText = document.getElementById('tuned-text');
+            const valLabel = document.getElementById('slider-val');
+            const statusText = document.getElementById('status-text');
+            
+            if(!valLabel) return;
+
+            valLabel.innerText = val + "%";
+            const percentage = val + '%';
+            slider.style.background = `linear-gradient(90deg, var(--cyan) ${percentage}, #222 ${percentage})`;
+
+            tuned.style.opacity = val / 100;
+            raw.style.opacity = 1 - (val / 100);
+            
+            const blurAmount = 5 - (val / 20); 
+            tunedText.style.filter = `blur(${Math.max(0, blurAmount)}px)`;
+            tunedText.style.opacity = 0.5 + (val/200);
+
+            if (val > 85) {
+                tunedText.classList.add('gold-mode');
+                container.classList.add('active-gold');
+                slider.classList.add('gold-thumb');
+                statusText.style.color = 'var(--gold)';
+                statusText.innerText = "STATUS: SOUL INJECTED (灵魂注入)";
+                valLabel.style.color = 'var(--gold)';
+                slider.style.background = `linear-gradient(90deg, var(--gold) ${percentage}, #222 ${percentage})`;
+            } else {
+                tunedText.classList.remove('gold-mode');
+                container.classList.remove('active-gold');
+                slider.classList.remove('gold-thumb');
+                statusText.style.color = 'var(--cyan)';
+                statusText.innerText = "STATUS: HUMANIZED (注入灵魂)";
+                valLabel.style.color = 'var(--cyan)';
+            }
+        }
+
+        // === 2. 城市地图交互 ===
+        const cityData = {
+            'beijing': { tag: 'DECISION CORE', title: '北京·决策核心', desc: '政策与技术双高地，聚焦高端认知数据训练，引领通用大模型发展。', val1: 'Tier 1', val2: '100+' },
+            'hefei': { tag: 'VOICE HUB', title: '合肥·语音枢纽', desc: '国家智能语音产业基地，服务大模型100+。', val1: 'Tier 2', val2: '50+' },
+            'hangzhou': { tag: 'E-COMMERCE', title: '杭州·电商图谱', desc: '结合电商、金融场景，数据标注在用户行为、商品语义领域具有丰富经验。', val1: 'Tier 1', val2: '80+' },
+            'chengdu': { tag: 'MULTI-LANG', title: '成都·多语种', desc: '西部地区重要节点，拥有丰富的多语言语音/文本语料资源。', val1: 'Tier 2', val2: '60+' }
+        };
+
+        const infoPanel = document.getElementById('info-panel');
+
+        function showCity(key) {
+            const data = cityData[key];
+            if (data && infoPanel) {
+                infoPanel.classList.add('active');
+                document.getElementById('d-tag').innerText = data.tag;
+                document.getElementById('d-title').innerText = data.title;
+                document.getElementById('d-desc').innerText = data.desc;
+                document.getElementById('d-val1').innerText = data.val1;
+                document.getElementById('d-val2').innerText = data.val2;
+            }
+        }
+
+        function hideCity() {
+            if(infoPanel) infoPanel.classList.remove('active');
+        }
+
+        // === 3. 滚动动画 (IntersectionObserver) ===
+        // [修复说明]：已修改此处，不再使用内联 transform 覆盖位置，而是清除内联样式，
+        // 让 CSS 的 hover 翻转效果能正常生效。
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 设置不透明度为可见
+                    entry.target.style.opacity = 1;
+                    
+                    // 【关键修复】清除 transform 内联样式
+                    // 之前代码是 set 'translateY(0)'，这会覆盖 CSS 中的 rotateY(180deg)
+                    // 现在清除后，元素回到默认位置，且 hover 翻转不再被阻挡
+                    entry.target.style.transform = ''; 
+                    
+                    if (entry.target.classList.contains('comparison-chart')) {
+                        document.querySelectorAll('.progress-bar').forEach(bar => {
+                            bar.style.width = bar.getAttribute('data-width');
+                        });
+                    }
+                }
+            });
+        }, { threshold: 0.15 });
+        
+        document.querySelectorAll('.fade-in, .comparison-chart, .summary-panel, .card-wrap').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(20px)'; // 初始偏移状态
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // 初始化
+        updateTuner(0);
+    </script>
+</body>
+</html>
